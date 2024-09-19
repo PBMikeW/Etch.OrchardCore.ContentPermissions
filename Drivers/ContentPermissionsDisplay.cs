@@ -78,9 +78,9 @@ namespace Etch.OrchardCore.ContentPermissions.Drivers
             });
         }
 
-        public override async Task<IDisplayResult> UpdateAsync(ContentPermissionsPart model, IUpdateModel updater, UpdatePartEditorContext context)
+        public override async Task<IDisplayResult> UpdateAsync(ContentPermissionsPart model, UpdatePartEditorContext context)
         {
-            await updater.TryUpdateModelAsync(model, Prefix, m => m.Enabled, m => m.Roles);
+            await context.Updater.TryUpdateModelAsync(model, Prefix, m => m.Enabled, m => m.Roles);
 
             if (!model.Enabled)
             {

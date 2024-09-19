@@ -2,6 +2,7 @@
 using Etch.OrchardCore.ContentPermissions.ViewModels;
 using OrchardCore.ContentManagement.Metadata.Models;
 using OrchardCore.ContentTypes.Editors;
+using OrchardCore.DisplayManagement.Handlers;
 using OrchardCore.DisplayManagement.ModelBinding;
 using OrchardCore.DisplayManagement.Views;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Etch.OrchardCore.ContentPermissions.Settings
 {
     public class ContentPermissionsPartSettingsDisplayDriver : ContentTypePartDefinitionDisplayDriver
     {
-        public override IDisplayResult Edit(ContentTypePartDefinition contentTypePartDefinition, IUpdateModel updater)
+        public override IDisplayResult Edit(ContentTypePartDefinition contentTypePartDefinition, BuildEditorContext context)
         {
             if (!string.Equals(nameof(ContentPermissionsPart), contentTypePartDefinition.PartDefinition.Name))
             {
@@ -38,7 +39,7 @@ namespace Etch.OrchardCore.ContentPermissions.Settings
 
             context.Builder.WithSettings(new ContentPermissionsPartSettings { RedirectUrl = model.RedirectUrl });
 
-            return Edit(contentTypePartDefinition, context.Updater);
+            return Edit(contentTypePartDefinition, context);
         }
     }
 }
