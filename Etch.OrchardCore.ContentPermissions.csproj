@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <PbTargetFramework Condition="'$(PbTargetFramework)' == ''">net8.0</PbTargetFramework>
+    <OrchardCoreVersion Condition="'$(OrchardCoreVersion)' == ''">2.2.1</OrchardCoreVersion>
+    <TargetFramework>$(PbTargetFramework)</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>$(VersionNumber)</Version>
@@ -13,13 +15,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OrchardCore.ContentManagement" Version="2.2.1" />
-    <PackageReference Include="OrchardCore.ContentManagement.Display" Version="2.2.1" />
-    <PackageReference Include="OrchardCore.ContentTypes" Version="2.2.1" />
-    <PackageReference Include="OrchardCore.DisplayManagement" Version="2.2.1" />
-    <PackageReference Include="OrchardCore.Indexing" Version="2.2.1" />
-    <PackageReference Include="OrchardCore.ResourceManagement" Version="2.2.1" />
-    <PackageReference Include="OrchardCore.Module.Targets" Version="2.2.1" />
+    <PackageReference Include="OrchardCore.ContentManagement" Version="$(OrchardCoreVersion)" />
+    <PackageReference Include="OrchardCore.ContentManagement.Display" Version="$(OrchardCoreVersion)" />
+    <PackageReference Include="OrchardCore.ContentTypes" Version="$(OrchardCoreVersion)" />
+    <PackageReference Include="OrchardCore.DisplayManagement" Version="$(OrchardCoreVersion)" />
+    <PackageReference Include="OrchardCore.Indexing" Version="$(OrchardCoreVersion)" />
+    <PackageReference Include="OrchardCore.ResourceManagement" Version="$(OrchardCoreVersion)" />
+    <PackageReference Include="OrchardCore.Module.Targets" Version="$(OrchardCoreVersion)" />
+    <!--
+      IRoleService/RoleServiceExtensions keep the same OrchardCore.Security.Services
+      namespace in OC 3.0.1, but move from OrchardCore.Infrastructure.Abstractions
+      (pulled in transitively today) to OrchardCore.Roles.Abstractions, which is not
+      referenced transitively by any package above under net10.0. Add it explicitly,
+      net10.0 only, so the default (net8.0/2.2.1) graph is unchanged.
+    -->
+    <PackageReference Include="OrchardCore.Roles.Abstractions" Version="$(OrchardCoreVersion)" Condition="'$(PbTargetFramework)' == 'net10.0'" />
   </ItemGroup>
 
   <ItemGroup>
