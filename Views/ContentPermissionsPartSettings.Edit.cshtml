@@ -6,6 +6,6 @@
     <div class="col-lg">
         <label asp-for="RedirectUrl">@T["Redirect URL"]</label>
         <input type="text" asp-for="RedirectUrl" class="form-control" />
-        <span class="hint">@T["User will be redirected to this URL when unable to access content item. Leave blank to disable redirect and handle user not having permission within view template."]</span>
+        <span class="hint">@T["User will be redirected to this URL when unable to access content item. Leave blank to disable redirect and handle user not having permission within view template. Use {returnUrl} in the URL to pass the denied page's path back, e.g. /pb-silent-sso?returnUrl={returnUrl}&fallback=%2FError%2F403."]</span>
     </div>
 </div>

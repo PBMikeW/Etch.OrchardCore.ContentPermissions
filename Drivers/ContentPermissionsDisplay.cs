@@ -60,7 +60,16 @@ namespace Etch.OrchardCore.ContentPermissions.Drivers
                 }
             }
 
-            _httpContextAccessor.HttpContext.Response.Redirect($"{_httpContextAccessor.HttpContext.Request.PathBase}{redirectUrl}", false);
+            // A "{returnUrl}" token in the configured URL is replaced with the escaped path and
+            // query of the page being denied, so the target (e.g. a sign-in attempt) can return here.
+            var request = _httpContextAccessor.HttpContext.Request;
+            if (redirectUrl.Contains("{returnUrl}", StringComparison.Ordinal))
+            {
+                var returnUrl = Uri.EscapeDataString($"{request.Path}{request.QueryString}");
+                redirectUrl = redirectUrl.Replace("{returnUrl}", returnUrl, StringComparison.Ordinal);
+            }
+
+            _httpContextAccessor.HttpContext.Response.Redirect($"{request.PathBase}{redirectUrl}", false);
 
             return null;
         }
