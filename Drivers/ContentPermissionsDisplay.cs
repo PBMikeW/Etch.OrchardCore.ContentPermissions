@@ -9,6 +9,7 @@ using OrchardCore.DisplayManagement.ModelBinding;
 using OrchardCore.DisplayManagement.Views;
 using OrchardCore.Security.Services;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,16 +22,22 @@ namespace Etch.OrchardCore.ContentPermissions.Drivers
         private readonly IContentPermissionsService _contentPermissionsService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IRoleService _roleService;
+        private readonly IEnumerable<IContentPermissionsOverride> _overrides;
 
         #endregion
 
         #region Constructor
 
-        public ContentPermissionsDisplay(IContentPermissionsService contentPermissionsService, IHttpContextAccessor httpContextAccessor, IRoleService roleService)
+        public ContentPermissionsDisplay(
+            IContentPermissionsService contentPermissionsService,
+            IHttpContextAccessor httpContextAccessor,
+            IRoleService roleService,
+            IEnumerable<IContentPermissionsOverride> overrides)
         {
             _contentPermissionsService = contentPermissionsService;
             _httpContextAccessor = httpContextAccessor;
             _roleService = roleService;
+            _overrides = overrides;
         }
 
         #endregion
@@ -41,7 +48,7 @@ namespace Etch.OrchardCore.ContentPermissions.Drivers
         {
             var settings = await _contentPermissionsService.GetSettingsAsync(part);
 
-            if (context.DisplayType != "Detail" || _contentPermissionsService.CanAccess(part))
+            if (context.DisplayType != "Detail" || await CanAccessAsync(part))
             {
                 return null;
             }
@@ -97,6 +104,38 @@ namespace Etch.OrchardCore.ContentPermissions.Drivers
             }
 
             return Edit(model, context);
+        }
+
+        #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// The role list, or failing that any registered <see cref="IContentPermissionsOverride"/>
+        /// that grants the signed-in user this item.
+        /// </summary>
+        private async Task<bool> CanAccessAsync(ContentPermissionsPart part)
+        {
+            if (_contentPermissionsService.CanAccess(part))
+            {
+                return true;
+            }
+
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user == null || part.ContentItem == null)
+            {
+                return false;
+            }
+
+            foreach (var permissionsOverride in _overrides)
+            {
+                if (await permissionsOverride.CanAccessAsync(user, part.ContentItem))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #endregion
